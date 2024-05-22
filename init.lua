@@ -142,11 +142,12 @@ require('lazy').setup({
     'lewis6991/gitsigns.nvim',
     opts = {
       signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
+        add = { text = '│' },
+        change = { text = '│' },
+        delete = { text = '󰍵' },
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
+        untracked = { text = '│' },
       },
     },
   },
@@ -287,6 +288,54 @@ require('lazy').setup({
       -- used for completion, annotations and signatures of Neovim apis
       { 'folke/neodev.nvim', opts = {} },
     },
+    opts = {
+      diagnostics = {
+        underline = true,
+        update_in_insert = false,
+        virtual_text = {
+          spacing = 4,
+          source = 'if_many',
+          prefix = '●',
+          -- this will set set the prefix to a function that returns the diagnostics icon based on the severity
+          -- this only works on a recent 0.10.0 build. Will be set to "●" when not supported
+          -- prefix = "icons",
+        },
+        severity_sort = true,
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = ' ',
+            [vim.diagnostic.severity.WARN] = ' ',
+            [vim.diagnostic.severity.HINT] = ' ',
+            [vim.diagnostic.severity.INFO] = ' ',
+          },
+        },
+      },
+      -- Enable this to enable the builtin LSP inlay hints on Neovim >= 0.10.0
+      -- Be aware that you also will need to properly configure your LSP server to
+      -- provide the inlay hints.
+      inlay_hints = {
+        enabled = true,
+      },
+      -- Enable this to enable the builtin LSP code lenses on Neovim >= 0.10.0
+      -- Be aware that you also will need to properly configure your LSP server to
+      -- provide the code lenses.
+      codelens = {
+        enabled = false,
+      },
+      -- Enable lsp cursor word highlighting
+      document_highlight = {
+        enabled = true,
+      },
+      -- add any global capabilities here
+      capabilities = {},
+      -- options for vim.lsp.buf.format
+      -- `bufnr` and `filter` is handled by the LazyVim formatter,
+      -- but can be also overridden when specified
+      format = {
+        formatting_options = nil,
+        timeout_ms = nil,
+      },
+    },
     config = function()
       require('lspconfig.ui.windows').default_options = {
         border = 'rounded',
@@ -377,21 +426,10 @@ require('lazy').setup({
         css_variables = {},
         cssmodules_ls = {},
         eslint = {
-          on_attach = function(client)
-            if client.name == 'eslint' then
-              client.server_capabilities.documentFormattingProvider = true
-            elseif client.name == 'tailwind-tools' then
-              client.server_capabilities.documentFormattingProvider = false
-            end
-          end,
-          capabilities = capabilities,
           settings = {
-            format = { enable = true },
+            workingDirectories = { mode = 'auto' },
           },
-          root_dir = require('lspconfig.util').root_pattern '.git',
-          workingDirectory = { mode = 'auto' },
         },
-        -- tsserver = {},
         omnisharp = {},
         tailwindcss = {},
         marksman = {},
@@ -429,9 +467,9 @@ require('lazy').setup({
         'html-lsp',
         'prettier',
         'json-lsp',
-        'eslint-lsp',
         'tailwindcss-language-server',
         'rustywind',
+        'eslint-lsp',
 
         -- development
         'omnisharp',
@@ -463,6 +501,8 @@ require('lazy').setup({
   { -- Autoformat
     'stevearc/conform.nvim',
     opts = {
+      lsp_fallback = true,
+      timeout_ms = 500,
       notify_on_error = true,
       format_on_save = function(bufnr)
         -- Disable "format_on_save lsp_fallback" for languages that don't
@@ -476,18 +516,12 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        javascript = { 'prettier' },
-        css = { 'prettier' },
-        html = { 'prettier' },
+        javascript = { 'eslint_d', 'eslint', 'prettier' },
+        css = { { 'prettierd', 'prettier' } },
+        html = { { 'prettierd', 'prettier' } },
         csharp = { 'csharpier' },
-        typescript = { 'eslint' },
-        typescriptreact = { 'eslint' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use a sub-list to tell conform to run *until* a formatter
-        -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
+        typescript = { { 'eslint_d', 'eslint', 'prettierd', 'prettier' } },
+        typescriptreact = { { 'eslint_d', 'eslint', 'prettierd', 'prettier' } },
       },
     },
   },
@@ -713,16 +747,24 @@ require('lazy').setup({
   {
     'folke/trouble.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
-    opts = {
-      -- your configuration comes here
-      -- or leave it empty to use the default settings
-      -- refer to the configuration section below
-    },
+    opts = {},
   },
   {
     'folke/noice.nvim',
     event = 'VeryLazy',
     opts = {
+      views = {
+        cmdline_popup = {
+          border = {
+            style = 'none',
+            padding = { 2, 3 },
+          },
+          filter_options = {},
+          win_options = {
+            winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
+          },
+        },
+      },
       lsp = {
         -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
         override = {
@@ -748,6 +790,31 @@ require('lazy').setup({
       --   If not available, we use `mini` as the fallback
       'rcarriga/nvim-notify',
     },
+  },
+  {
+    'nvimtools/none-ls.nvim',
+    dependencies = {
+      'nvimtools/none-ls-extras.nvim',
+    },
+    opts = function(_, opts)
+      local nls = require 'null-ls'
+      opts.sources = opts.sources or {}
+
+      nls.setup {
+        sources = {
+          nls.builtins.code_actions.gitrebase,
+          nls.builtins.code_actions.gitsigns,
+          nls.builtins.code_actions.refactoring,
+          nls.builtins.diagnostics.markdownlint,
+          nls.builtins.formatting.csharpier,
+          nls.builtins.formatting.prettier,
+          nls.builtins.formatting.rustywind,
+          nls.builtins.formatting.stylua,
+          require 'none-ls.diagnostics.eslint',
+          require 'none-ls.code_actions.eslint',
+        },
+      }
+    end,
   },
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
