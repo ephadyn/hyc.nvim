@@ -405,6 +405,12 @@ require('lazy').setup({
               callback = vim.lsp.buf.clear_references,
             })
           end
+
+          if client.name == 'eslint' then
+            client.server_capabilities.documentFormattingProvider = true
+          elseif client.name == 'typescript-tools' then
+            client.server_capabilities.documentFormattingProvider = false
+          end
         end,
       })
 
@@ -425,7 +431,7 @@ require('lazy').setup({
         cssls = {},
         css_variables = {},
         cssmodules_ls = {},
-        eslint_d = {
+        eslint = {
           settings = {
             workingDirectories = { mode = 'auto' },
           },
@@ -469,7 +475,7 @@ require('lazy').setup({
         'json-lsp',
         'tailwindcss-language-server',
         'rustywind',
-        'eslint_d',
+        'eslint-lsp',
 
         -- development
         'omnisharp',
@@ -516,12 +522,12 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        javascript = { 'eslint_d', 'eslint', 'prettier' },
-        css = { { 'prettierd', 'prettier' } },
-        html = { { 'prettierd', 'prettier' } },
+        javascript = { 'eslint', 'prettier' },
+        css = { { 'eslint', 'prettier' } },
+        html = { { 'eslint', 'prettier' } },
         csharp = { 'csharpier' },
-        typescript = { { 'eslint_d', 'eslint', 'prettierd', 'prettier' } },
-        typescriptreact = { { 'eslint_d', 'eslint', 'prettierd', 'prettier' } },
+        typescript = { { 'eslint', 'prettier' } },
+        typescriptreact = { { 'eslint', 'prettier' } },
       },
     },
   },
@@ -810,9 +816,9 @@ require('lazy').setup({
           nls.builtins.formatting.prettier,
           nls.builtins.formatting.rustywind,
           nls.builtins.formatting.stylua,
-          require 'none-ls.diagnostics.eslint_d',
-          require 'none-ls.code_actions.eslint_d',
-          require 'none-ls.formatting.eslint_d',
+          require 'none-ls.diagnostics.eslint',
+          require 'none-ls.code_actions.eslint',
+          require 'none-ls.formatting.eslint',
         },
       }
     end,
