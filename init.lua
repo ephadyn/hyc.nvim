@@ -536,6 +536,8 @@ require('lazy').setup({
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
     dependencies = {
+      'luckasRanarison/tailwind-tools.nvim',
+      'onsails/lspkind-nvim',
       -- Snippet Engine & its associated nvim-cmp source
       {
         'L3MON4D3/LuaSnip',
@@ -631,6 +633,15 @@ require('lazy').setup({
 
           -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
           --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+        },
+        ---@diagnostic disable-next-line: missing-fields
+        formatting = {
+          format = require('lspkind').cmp_format {
+            before = require('tailwind-tools.cmp').lspkind_format,
+            maxwidth = 50,
+            ellipsis_char = '...',
+            symbol_map = { Codeium = '' },
+          },
         },
         sources = {
           { name = 'nvim_lsp' },
@@ -822,7 +833,37 @@ require('lazy').setup({
         },
       }
     end,
-  }, -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
+  },
+  {
+    'luckasRanarison/tailwind-tools.nvim',
+    ft = {
+      'html',
+      'css',
+      'scss',
+      'javascript',
+      'typescript',
+      'javascriptreact',
+      'typescriptreact',
+    },
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    opts = {
+      document_color = {
+        enabled = true, -- can be toggled by commands
+        kind = 'inline', -- "inline" | "foreground" | "background"
+        inline_symbol = '󰝤 ', -- only used in inline mode
+        debounce = 200, -- in milliseconds, only applied in insert mode
+      },
+      conceal = {
+        enabled = true, -- can be toggled by commands
+        symbol = '󱏿', -- only a single character is allowed
+        highlight = { -- extmark highlight options, see :h 'highlight'
+          fg = '#38BDF8',
+        },
+      },
+      custom_filetypes = {},
+    },
+  },
+  -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
 
