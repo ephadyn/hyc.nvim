@@ -425,7 +425,7 @@ require('lazy').setup({
         cssls = {},
         css_variables = {},
         cssmodules_ls = {},
-        eslint = {
+        eslint_d = {
           settings = {
             workingDirectories = { mode = 'auto' },
           },
@@ -469,7 +469,7 @@ require('lazy').setup({
         'json-lsp',
         'tailwindcss-language-server',
         'rustywind',
-        'eslint-lsp',
+        'eslint_d',
 
         -- development
         'omnisharp',
@@ -810,13 +810,13 @@ require('lazy').setup({
           nls.builtins.formatting.prettier,
           nls.builtins.formatting.rustywind,
           nls.builtins.formatting.stylua,
-          require 'none-ls.diagnostics.eslint',
-          require 'none-ls.code_actions.eslint',
+          require 'none-ls.diagnostics.eslint_d',
+          require 'none-ls.code_actions.eslint_d',
+          require 'none-ls.formatting.eslint_d',
         },
       }
     end,
-  },
-  -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
+  }, -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
 
