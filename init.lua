@@ -128,8 +128,6 @@ if not vim.loop.fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
--- [[ Put a border around the hover box ]]
-
 -- [[ Configure and install plugins ]]
 --
 -- NOTE: Here is where you install your plugins.
@@ -288,19 +286,12 @@ require('lazy').setup({
       -- used for completion, annotations and signatures of Neovim apis
       { 'folke/neodev.nvim', opts = {} },
     },
-    opts = {
-      diagnostics = {
-        underline = true,
-        update_in_insert = false,
-        virtual_text = {
-          spacing = 4,
-          source = 'if_many',
-          prefix = '●',
-          -- this will set set the prefix to a function that returns the diagnostics icon based on the severity
-          -- this only works on a recent 0.10.0 build. Will be set to "●" when not supported
-          -- prefix = "icons",
-        },
-        severity_sort = true,
+    config = function()
+      require('lspconfig.ui.windows').default_options = {
+        border = 'rounded',
+      }
+
+      vim.diagnostic.config {
         signs = {
           text = {
             [vim.diagnostic.severity.ERROR] = ' ',
@@ -309,37 +300,14 @@ require('lazy').setup({
             [vim.diagnostic.severity.INFO] = ' ',
           },
         },
-      },
-      -- Enable this to enable the builtin LSP inlay hints on Neovim >= 0.10.0
-      -- Be aware that you also will need to properly configure your LSP server to
-      -- provide the inlay hints.
-      inlay_hints = {
-        enabled = true,
-      },
-      -- Enable this to enable the builtin LSP code lenses on Neovim >= 0.10.0
-      -- Be aware that you also will need to properly configure your LSP server to
-      -- provide the code lenses.
-      codelens = {
-        enabled = false,
-      },
-      -- Enable lsp cursor word highlighting
-      document_highlight = {
-        enabled = true,
-      },
-      -- add any global capabilities here
-      capabilities = {},
-      -- options for vim.lsp.buf.format
-      -- `bufnr` and `filter` is handled by the LazyVim formatter,
-      -- but can be also overridden when specified
-      format = {
-        formatting_options = nil,
-        timeout_ms = nil,
-      },
-    },
-    config = function()
-      require('lspconfig.ui.windows').default_options = {
-        border = 'rounded',
+        severity_sort = true,
+        virtual_text = {
+          spacing = 4,
+          source = 'if_many',
+          prefix = '●',
+        },
       }
+
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
@@ -406,9 +374,9 @@ require('lazy').setup({
             })
           end
 
-          if client.name == 'eslint' or client.name == 'eslint_d' then
+          if client and client.name == 'eslint' or client and client.name == 'eslint_d' then
             client.server_capabilities.documentFormattingProvider = true
-          elseif client.name == 'typescript-tools' then
+          elseif client and client.name == 'typescript-tools' or client and client.name == 'tsserver' then
             client.server_capabilities.documentFormattingProvider = false
           end
         end,
@@ -605,7 +573,7 @@ require('lazy').setup({
           -- Accept ([y]es) the completion.
           --  This will auto-import if your LSP supports it.
           --  This will expand snippets if the LSP sent a snippet.
-          ['<C-y>'] = cmp.mapping.confirm { select = true },
+          ['<TAB>'] = cmp.mapping.confirm { select = true },
 
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
@@ -867,7 +835,7 @@ require('lazy').setup({
     opts = {
       document_color = {
         enabled = true, -- can be toggled by commands
-        kind = 'foreground', -- "inline" | "foreground" | "background"
+        kind = 'inline', -- "inline" | "foreground" | "background"
         inline_symbol = '󰝤 ', -- only used in inline mode
         debounce = 200, -- in milliseconds, only applied in insert mode
       },
