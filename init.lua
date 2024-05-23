@@ -406,7 +406,7 @@ require('lazy').setup({
             })
           end
 
-          if client.name == 'eslint' then
+          if client.name == 'eslint' or client.name == 'eslint_d' then
             client.server_capabilities.documentFormattingProvider = true
           elseif client.name == 'typescript-tools' then
             client.server_capabilities.documentFormattingProvider = false
@@ -431,7 +431,7 @@ require('lazy').setup({
         cssls = {},
         css_variables = {},
         cssmodules_ls = {},
-        eslint = {
+        eslint_d = {
           settings = {
             workingDirectories = { mode = 'auto' },
           },
@@ -475,7 +475,7 @@ require('lazy').setup({
         'json-lsp',
         'tailwindcss-language-server',
         'rustywind',
-        'eslint-lsp',
+        'eslint_d',
 
         -- development
         'omnisharp',
@@ -522,12 +522,12 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        javascript = { 'eslint', 'prettier' },
-        css = { { 'eslint', 'prettier' } },
-        html = { { 'eslint', 'prettier' } },
+        javascript = { 'eslint_d', 'eslint', 'prettier' },
+        css = { { 'eslint_d', 'eslint', 'prettier' } },
+        html = { { 'eslint_d', 'eslint', 'prettier' } },
         csharp = { 'csharpier' },
-        typescript = { { 'eslint', 'prettier' } },
-        typescriptreact = { { 'eslint', 'prettier' } },
+        typescript = { { 'eslint_d', 'eslint', 'prettier' } },
+        typescriptreact = { { 'eslint_d', 'eslint', 'prettier' } },
       },
     },
   },
@@ -772,13 +772,31 @@ require('lazy').setup({
     opts = {
       views = {
         cmdline_popup = {
-          border = {
-            style = 'none',
-            padding = { 2, 3 },
+          position = {
+            row = 5,
+            col = '50%',
           },
-          filter_options = {},
+          size = {
+            width = 60,
+            height = 'auto',
+          },
+        },
+        popupmenu = {
+          relative = 'editor',
+          position = {
+            row = 8,
+            col = '50%',
+          },
+          size = {
+            width = 60,
+            height = 10,
+          },
+          border = {
+            style = 'rounded',
+            padding = { 0, 1 },
+          },
           win_options = {
-            winhighlight = 'NormalFloat:NormalFloat,FloatBorder:FloatBorder',
+            winhighlight = { Normal = 'Normal', FloatBorder = 'DiagnosticInfo' },
           },
         },
       },
@@ -827,9 +845,9 @@ require('lazy').setup({
           nls.builtins.formatting.prettier,
           nls.builtins.formatting.rustywind,
           nls.builtins.formatting.stylua,
-          require 'none-ls.diagnostics.eslint',
-          require 'none-ls.code_actions.eslint',
-          require 'none-ls.formatting.eslint',
+          require 'none-ls.diagnostics.eslint_d',
+          require 'none-ls.code_actions.eslint_d',
+          require 'none-ls.formatting.eslint_d',
         },
       }
     end,
@@ -849,7 +867,7 @@ require('lazy').setup({
     opts = {
       document_color = {
         enabled = true, -- can be toggled by commands
-        kind = 'inline', -- "inline" | "foreground" | "background"
+        kind = 'foreground', -- "inline" | "foreground" | "background"
         inline_symbol = '󰝤 ', -- only used in inline mode
         debounce = 200, -- in milliseconds, only applied in insert mode
       },
