@@ -105,6 +105,8 @@ if vim.g.vscode then
   require 'vscode-mappings'
 end
 
+local border_type = 'rounded'
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -127,6 +129,11 @@ if not vim.loop.fs_stat(lazypath) then
   vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
+
+-- [[ Exit out if using vscode ]]
+if vim.g.vscode then
+  return
+end
 
 -- [[ Configure and install plugins ]]
 --
@@ -162,6 +169,7 @@ require('lazy').setup({
         ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
         ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+        ['<leader>n'] = { name = '[N]NN', _ = 'which_key_ignore' },
       }
     end,
   },
@@ -288,7 +296,7 @@ require('lazy').setup({
     },
     config = function()
       require('lspconfig.ui.windows').default_options = {
-        border = 'rounded',
+        border = border_type,
       }
 
       vim.diagnostic.config {
@@ -306,6 +314,8 @@ require('lazy').setup({
           source = 'if_many',
           prefix = '●',
         },
+
+        -- update_in_insert = true,
       }
 
       vim.api.nvim_create_autocmd('LspAttach', {
@@ -374,7 +384,7 @@ require('lazy').setup({
             })
           end
 
-          if client and client.name == 'eslint' or client and client.name == 'eslint_d' then
+          if client and client.name == 'eslint' then
             client.server_capabilities.documentFormattingProvider = true
           elseif client and client.name == 'typescript-tools' or client and client.name == 'tsserver' then
             client.server_capabilities.documentFormattingProvider = false
@@ -399,7 +409,7 @@ require('lazy').setup({
         cssls = {},
         css_variables = {},
         cssmodules_ls = {},
-        eslint_d = {
+        eslint = {
           settings = {
             workingDirectories = { mode = 'auto' },
           },
@@ -443,7 +453,7 @@ require('lazy').setup({
         'json-lsp',
         'tailwindcss-language-server',
         'rustywind',
-        'eslint_d',
+        'eslint-lsp',
 
         -- development
         'omnisharp',
@@ -760,8 +770,8 @@ require('lazy').setup({
             height = 10,
           },
           border = {
-            style = 'rounded',
-            padding = { 0, 1 },
+            style = border_type,
+            padding = { 1, 1 },
           },
           win_options = {
             winhighlight = { Normal = 'Normal', FloatBorder = 'DiagnosticInfo' },
@@ -796,9 +806,6 @@ require('lazy').setup({
   },
   {
     'nvimtools/none-ls.nvim',
-    dependencies = {
-      'nvimtools/none-ls-extras.nvim',
-    },
     opts = function(_, opts)
       local nls = require 'null-ls'
       opts.sources = opts.sources or {}
@@ -813,9 +820,6 @@ require('lazy').setup({
           nls.builtins.formatting.prettierd,
           nls.builtins.formatting.rustywind,
           nls.builtins.formatting.stylua,
-          require 'none-ls.diagnostics.eslint_d',
-          require 'none-ls.code_actions.eslint_d',
-          require 'none-ls.formatting.eslint_d',
         },
       }
     end,
@@ -835,7 +839,7 @@ require('lazy').setup({
     opts = {
       document_color = {
         enabled = true, -- can be toggled by commands
-        kind = 'inline', -- "inline" | "foreground" | "background"
+        kind = 'foreground', -- "inline" | "foreground" | "background"
         inline_symbol = '󰝤 ', -- only used in inline mode
         debounce = 200, -- in milliseconds, only applied in insert mode
       },
@@ -848,6 +852,47 @@ require('lazy').setup({
       },
       custom_filetypes = {},
     },
+  },
+  {
+    'https://git.sr.ht/~whynothugo/lsp_lines.nvim',
+    config = function()
+      require('lsp_lines').setup()
+      vim.diagnostic.config {
+        virtual_text = false,
+      }
+      vim.keymap.set('', '<Leader>cl', require('lsp_lines').toggle, { desc = 'Toggle lsp_lines' })
+    end,
+  },
+  {
+    'luukvbaal/nnn.nvim',
+    config = function()
+      require('nnn').setup()
+      local map = vim.keymap.set
+      map('', '<leader>ne', '<CMD>NnnExplorer<CR>')
+      map('', '<leader>np', '<CMD>NnnPicker %:p<CR>')
+    end,
+    -- keys = {
+    --   {
+    --     '',
+    --     '<Leader>ne',
+    --     '<CMD>NnnExplorer<CR>',
+    --     { desc = 'Toggle NNN Explorer' },
+    --   },
+    --   {
+    --     '',
+    --     '<Leader>np',
+    --     '<CMD>NnnPicker<CR>',
+    --     { desc = 'Toggle NNN Picker' },
+    --   },
+    -- },
+  },
+  {
+    'NvChad/nvim-colorizer.lua',
+    config = function()
+      require('colorizer').setup {
+        user_default_options = { mode = 'foreground', names = false },
+      }
+    end,
   },
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
