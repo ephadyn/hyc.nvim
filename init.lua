@@ -414,6 +414,7 @@ require('lazy').setup({
             workingDirectories = { mode = 'auto' },
           },
         },
+        gopls = {},
         omnisharp = {},
         tailwindcss = {},
         marksman = {},
@@ -462,6 +463,7 @@ require('lazy').setup({
         'docker-compose-language-service',
         'terraform-ls',
         'marksman',
+        'goimports',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -506,6 +508,7 @@ require('lazy').setup({
         csharp = { 'csharpier' },
         typescript = { { 'eslint_d', 'eslint', 'prettierd', 'prettier' } },
         typescriptreact = { { 'eslint_d', 'eslint', 'prettierd', 'prettier' } },
+        golang = { 'goimports' },
       },
     },
   },
@@ -708,6 +711,7 @@ require('lazy').setup({
         'c_sharp',
         'markdown',
         'markdown_inline',
+        'go',
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
